@@ -10,44 +10,45 @@ import subprocess
 from pprint import pprint
 
 # Evaluate files
-originalComposerPath = 'composer.json'
-schemaComposerPath = 'composer-tmp/composer-schema.json'
+rootComposerPath = 'composer.json'
+bkpComposerPath = 'composer-tmp/composer.json'
+tmpComposerPath = 'composer-tmp/composer-schema.json'
 
 # If default composer dont exist skip everything and throw message
-if not os.path.isfile(originalComposerPath):
+if not os.path.isfile(rootComposerPath):
     print 'The file composer.json was not found! Run this script at your projects root directory'
     sys.exit()
 elif not os.path.exists('composer-tmp'):
     print 'The composer-tmp directory and the file composer-schema.json were successfully regenerated'
     os.makedirs('composer-tmp')
-    open('composer-tmp/composer-schema.json', 'a').close()
+    open(tmpComposerPath, 'a').close()
 # Regenerate composer-schema.json
-elif not os.path.isfile(schemaComposerPath):
-    open('composer-tmp/composer-schema.json', 'a').close()
+elif not os.path.isfile(tmpComposerPath):
+    open(tmpComposerPath, 'a').close()
     print 'The file composer-schema.json was successfully generated!'
 
 # Prepare environment to install by parts
-shutil.move('composer.json', 'composer-tmp/composer.json')
-shutil.move('composer-tmp/composer-schema.json', 'composer.json')
+shutil.move(rootComposerPath, bkpComposerPath)
+shutil.move(tmpComposerPath, rootComposerPath)
 
 # Regenerate composer-schema.json
-open('composer-tmp/composer-schema.json', 'a').close()
+open(tmpComposerPath, 'a').close()
 
 # Get real composer.json
-with open('composer-tmp/composer.json') as data_file:
-    current_composer = json.load(data_file)
+with open(bkpComposerPath) as data_file:
+    originalComposerJson = json.load(data_file)
 
 # This only makes sense if exist key require in dictionary
 # meaning if our composer has packages to install else skip everything
-if 'require' in current_composer:
+if 'require' in originalComposerJson:
 	# Clone from real composer.json and save an other empty in required packages
-    tmp_composer = dict(current_composer)
-    del tmp_composer['require']
-    with open('composer.json', 'w') as no_data_file:
-    	json.dump(tmp_composer, no_data_file)
+    cloneOriginalDict = dict(originalComposerJson)
+    del cloneOriginalDict['require']
+    with open(rootComposerPath, 'w') as no_data_file:
+    	json.dump(cloneOriginalDict, no_data_file)
 
     # For each item dictionary require dependency by defined version
-    for dependency, version in current_composer['require'].iteritems():
+    for dependency, version in originalComposerJson['require'].iteritems():
         # Skip require PHP as package
         if dependency == 'php':
             continue
@@ -56,4 +57,4 @@ if 'require' in current_composer:
     	time.sleep(180)
 
 # Revert action
-shutil.move('composer-tmp/composer.json', 'composer.json')
+shutil.move(bkpComposerPath, rootComposerPath)
