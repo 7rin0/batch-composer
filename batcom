@@ -34,6 +34,9 @@ if 'require' in current_composer:
 
     # For each item dictionary require dependency by defined version
     for dependency, version in current_composer['require'].iteritems():
+        # Skip require PHP as package
+        if dependency == 'php':
+            continue
     	requiredDependency = "composer require " + dependency + ":" + version + " --profile"
     	subprocess.Popen(requiredDependency, stdout=subprocess.PIPE, shell=True)
     	time.sleep(180)
