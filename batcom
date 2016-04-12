@@ -2,13 +2,31 @@
 
 # Import python modules
 import os
+import sys
 import json
 import time
 import shutil
 import subprocess
 from pprint import pprint
 
-# Switch directories of both composers
+# Evaluate files
+originalComposerPath = 'composer.json'
+schemaComposerPath = 'composer-tmp/composer-schema.json'
+
+# If default composer dont exist skip everything and throw message
+if not os.path.isfile(originalComposerPath):
+    print 'The file composer.json was not found! Run this script at your projects root directory'
+    sys.exit()
+elif not os.path.exists('composer-tmp'):
+    print 'The composer-tmp directory and the file composer-schema.json were successfully regenerated'
+    os.makedirs('composer-tmp')
+    open('composer-tmp/composer-schema.json', 'a').close()
+# Regenerate composer-schema.json
+elif not os.path.isfile(schemaComposerPath):
+    open('composer-tmp/composer-schema.json', 'a').close()
+    print 'The file composer-schema.json was successfully generated!'
+
+# Prepare environment to install by parts
 shutil.move('composer.json', 'composer-tmp/composer.json')
 shutil.move('composer-tmp/composer-schema.json', 'composer.json')
 
@@ -19,16 +37,12 @@ open('composer-tmp/composer-schema.json', 'a').close()
 with open('composer-tmp/composer.json') as data_file:
     current_composer = json.load(data_file)
 
-# Avoid output
-# FNULL = open(os.devnull, 'w')
-
 # This only makes sense if exist key require in dictionary
 # meaning if our composer has packages to install else skip everything
 if 'require' in current_composer:
 	# Clone from real composer.json and save an other empty in required packages
     tmp_composer = dict(current_composer)
     del tmp_composer['require']
-    print current_composer['require']
     with open('composer.json', 'w') as no_data_file:
     	json.dump(tmp_composer, no_data_file)
 
@@ -38,7 +52,7 @@ if 'require' in current_composer:
         if dependency == 'php':
             continue
     	requiredDependency = "composer require " + dependency + ":" + version + " --profile"
-    	subprocess.Popen(requiredDependency, stdout=subprocess.PIPE, shell=True)
+    	composerProccess = subprocess.Popen(requiredDependency, stdout=subprocess.PIPE, shell=True)
     	time.sleep(180)
 
 # Revert action
