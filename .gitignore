@@ -2,3 +2,5 @@ vendor
 web
 bin
 nohup
+composer.lock
+composer.json
