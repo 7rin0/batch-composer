@@ -52,9 +52,13 @@ if 'require' in originalComposerJson:
         # Skip require PHP as package
         if dependency == 'php':
             continue
-    	requiredDependency = "composer require " + dependency + ":" + version + " --profile"
+    	requiredDependency = "composer require " + dependency + ":" + version + " --profile --no-progress --no-update"
+        print "<<< Installing: " + dependency
     	composerProccess = subprocess.Popen(requiredDependency, stdout=subprocess.PIPE, shell=True)
-    	time.sleep(180)
+        composerProccess.wait()
+        print ' Installed >>>'
+        print ''
+    	# time.sleep(300)
 
 # Revert action
 shutil.move(bkpComposerPath, rootComposerPath)
