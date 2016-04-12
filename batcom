@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 # Import python modules
+import os
 import json
 import time
 import shutil
@@ -18,6 +19,9 @@ open('composer-tmp/composer-schema.json', 'a').close()
 with open('composer-tmp/composer.json') as data_file:
     current_composer = json.load(data_file)
 
+# Avoid output
+# FNULL = open(os.devnull, 'w')
+
 # This only makes sense if exist key require in dictionary
 # meaning if our composer has packages to install else skip everything
 if 'require' in current_composer:
@@ -30,9 +34,9 @@ if 'require' in current_composer:
 
     # For each item dictionary require dependency by defined version
     for dependency, version in current_composer['require'].iteritems():
-    	requiredDependency = "composer require " + dependency + ":" + version
+    	requiredDependency = "composer require " + dependency + ":" + version + " --profile"
     	subprocess.Popen(requiredDependency, stdout=subprocess.PIPE, shell=True)
-    	time.sleep(600)
+    	time.sleep(180)
 
 # Revert action
 shutil.move('composer-tmp/composer.json', 'composer.json')
