@@ -2,17 +2,29 @@
 
 # Import python modules
 import json
-import subprocess
 import time
+import shutil
+import subprocess
 from pprint import pprint
 
-# Parse composer.json
+# Get real composer.json
 with open('composer.json') as data_file:    
-    data = json.load(data_file)
+    current_composer = json.load(data_file)
 
-# For each dict type item require dependency allong their version
-for dependency, version in data['require'].iteritems():
-	requiredDependency = "composer require " + dependency + ":" + version
-	print requiredDependency	
-	subprocess.Popen(requiredDependency, stdout=subprocess.PIPE, shell=True)
-	time.sleep(60)
+# Clone from real composer.json and save an other empty in required packages
+tmp_composer = current_composer
+del tmp_composer['require']
+with open('composer-tmp/composer-schema.json', 'w') as no_data_file:
+	json.dump(tmp_composer, no_data_file)
+
+# Switch directories of both composers
+shutil.move('composer.json', 'composer-tmp/composer.json')
+shutil.move('composer-tmp/composer-schema.json', 'composer.json')
+
+# For each item dictionary require dependency by defined version
+#for dependency, version in data['require'].iteritems():
+#	requiredDependency = "composer require " + dependency + ":" + version
+#	print requiredDependency	
+#	subprocess.Popen(requiredDependency, stdout=subprocess.PIPE, shell=True)
+#	time.sleep(60)
+
