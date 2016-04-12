@@ -1,4 +1,4 @@
-# batch-composer
+# comprocess
 
 ## Usage
-asap
+Composer install and update by lot/batch/splitted processes ... more info and updates soon ...
