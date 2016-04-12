@@ -13,6 +13,7 @@ from pprint import pprint
 rootComposerPath = 'composer.json'
 bkpComposerPath = 'comprocess-tmp/composer.json'
 tmpComposerPath = 'comprocess-tmp/composer-schema.json'
+composerExec = 'comprocess-tmp/composer.phar'
 
 # If default composer dont exist skip everything and throw message
 if not os.path.isfile(rootComposerPath):
@@ -26,6 +27,11 @@ elif not os.path.exists('comprocess-tmp'):
 elif not os.path.isfile(tmpComposerPath):
     open(tmpComposerPath, 'a').close()
     print 'The file composer-schema.json was successfully generated!'
+
+# Get composer.phar if not exists
+if not os.path.isfile('comprocess-tmp/composer.phar'):
+    getComposer = subprocess.Popen("curl -sS https://getcomposer.org/installer | php && mv composer.phar comprocess-tmp/composer.phar", stdout=subprocess.PIPE, shell=True)
+    getComposer.wait()
 
 # Prepare environment to install by parts
 shutil.move(rootComposerPath, bkpComposerPath)
@@ -52,7 +58,7 @@ if 'require' in originalComposerJson:
         # Skip require PHP as package
         if dependency == 'php':
             continue
-    	requiredDependency = "composer require " + dependency + ":" + version + " --profile --no-progress --no-update"
+    	requiredDependency = "php -d memory_limit=-1 "+ composerExec +"" require " + dependency + ":" + version + " --profile --no-progress -vvv"
         print "<<< Installing: " + dependency
     	composerProccess = subprocess.Popen(requiredDependency, stdout=subprocess.PIPE, shell=True)
         composerProccess.wait()
