@@ -11,16 +11,16 @@ from pprint import pprint
 
 # Evaluate files
 rootComposerPath = 'composer.json'
-bkpComposerPath = 'composer-tmp/composer.json'
-tmpComposerPath = 'composer-tmp/composer-schema.json'
+bkpComposerPath = 'comprocess-tmp/composer.json'
+tmpComposerPath = 'comprocess-tmp/composer-schema.json'
 
 # If default composer dont exist skip everything and throw message
 if not os.path.isfile(rootComposerPath):
     print 'The file composer.json was not found! Run this script at your projects root directory'
     sys.exit()
-elif not os.path.exists('composer-tmp'):
-    print 'The composer-tmp directory and the file composer-schema.json were successfully regenerated'
-    os.makedirs('composer-tmp')
+elif not os.path.exists('comprocess-tmp'):
+    print 'The comprocess-tmp directory and the file composer-schema.json were successfully regenerated'
+    os.makedirs('comprocess-tmp')
     open(tmpComposerPath, 'a').close()
 # Regenerate composer-schema.json
 elif not os.path.isfile(tmpComposerPath):
