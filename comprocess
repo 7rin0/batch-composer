@@ -58,7 +58,7 @@ if 'require' in originalComposerJson:
         # Skip require PHP as package
         if dependency == 'php':
             continue
-    	requiredDependency = "php -d memory_limit=-1 "+ composerExec +"" require " + dependency + ":" + version + " --profile --no-progress -vvv"
+    	requiredDependency = "php -d memory_limit=-1 "+ composerExec +" require " + dependency + ":" + version + " --profile --no-progress -vvv"
         print "<<< Installing: " + dependency
     	composerProccess = subprocess.Popen(requiredDependency, stdout=subprocess.PIPE, shell=True)
         composerProccess.wait()
