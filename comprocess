@@ -1,13 +1,12 @@
 #!/usr/bin/python
+# pylint: disable-msg=C0103,C0111
 
 # Import python modules
 import os
 import sys
 import json
-import time
 import shutil
 import subprocess
-from pprint import pprint
 
 # Evaluate files
 rootComposerPath = 'composer.json'
@@ -17,20 +16,28 @@ composerExec = 'comprocess-tmp/composer.phar'
 
 # If default composer dont exist skip everything and throw message
 if not os.path.isfile(rootComposerPath):
-    print 'The file composer.json was not found! Run this script at your projects root directory'
+    print 'The file composer.json was not found! \
+    Run this script at your projects root directory'
     sys.exit()
 elif not os.path.exists('comprocess-tmp'):
-    print 'The comprocess-tmp directory and the file composer-schema.json were successfully regenerated'
+    print 'The comprocess-tmp directory and the file \
+    composer-schema.json were successfully regenerated'
     os.makedirs('comprocess-tmp')
     open(tmpComposerPath, 'a').close()
 # Regenerate composer-schema.json
 elif not os.path.isfile(tmpComposerPath):
     open(tmpComposerPath, 'a').close()
-    print 'The file composer-schema.json was successfully generated!'
+    print 'The file composer-schema.json was successfully \
+    generated!'
 
 # Get composer.phar if not exists
 if not os.path.isfile('comprocess-tmp/composer.phar'):
-    getComposer = subprocess.Popen("curl -sS https://getcomposer.org/installer | php && mv composer.phar comprocess-tmp/composer.phar", stdout=subprocess.PIPE, shell=True)
+    getComposer = subprocess.Popen(
+        "curl -sS https://getcomposer.org/installer | php && \
+        mv composer.phar comprocess-tmp/composer.phar",
+        stdout=subprocess.PIPE,
+        shell=True
+    )
     getComposer.wait()
 
 # Prepare environment to install by parts
@@ -47,24 +54,31 @@ with open(bkpComposerPath) as data_file:
 # This only makes sense if exist key require in dictionary
 # meaning if our composer has packages to install else skip everything
 if 'require' in originalComposerJson:
-	# Clone from real composer.json and save an other empty in required packages
+    # Clone from real composer.json
+    # save an other empty in required packages
     cloneOriginalDict = dict(originalComposerJson)
     del cloneOriginalDict['require']
     with open(rootComposerPath, 'w') as no_data_file:
-    	json.dump(cloneOriginalDict, no_data_file)
+        json.dump(cloneOriginalDict, no_data_file)
 
     # For each item dictionary require dependency by defined version
     for dependency, version in originalComposerJson['require'].iteritems():
         # Skip require PHP as package
         if dependency == 'php':
             continue
-    	requiredDependency = "php -d memory_limit=-1 "+ composerExec +" require " + dependency + ":" + version + " --profile --no-progress -vvv"
+        requiredDependency = "php -d memory_limit=-1 " + \
+            composerExec + " require " + dependency + ":" + \
+            version + " --profile --no-progress -vvv"
         print "<<< Installing: " + dependency
-    	composerProccess = subprocess.Popen(requiredDependency, stdout=subprocess.PIPE, shell=True)
+        composerProccess = subprocess.Popen(
+            requiredDependency,
+            stdout=subprocess.PIPE,
+            shell=True
+        )
         composerProccess.wait()
         print ' Installed >>>'
         print ''
-    	# time.sleep(300)
+        # time.sleep(300)
 
 # Revert action
 shutil.move(bkpComposerPath, rootComposerPath)
